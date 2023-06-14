@@ -1,16 +1,19 @@
 import pygame as game
 import random
 
-# colors
-white = (255, 255, 255)
-black = (0, 0, 0)
-gray = (128, 128, 128)
-brown = (150, 75, 0)
-
-
 # pygame setup
-screen_width = 1000
-screen_height = 1000
+
+screen_width = 700
+screen_height = 700
+board_size = 35
+board_color = 'black'
+board_pieces = [[0 for j in range(21)] for i in range(21)]
+
+for i in range(21): # invalid positions
+    board_pieces[0][i] = -1
+    board_pieces[20][i] = -1
+    board_pieces[i][0] = -1
+    board_pieces[i][20] = -1
 
 game.init()
 screen = game.display.set_mode((screen_width, screen_height))
@@ -39,35 +42,44 @@ turn = 0
 def draw_board(size): # OBS: mapear as posições para colocar as peças (ou encontrar solução semelhante)
     
     line_width = 3
-    
+    j = 0
     for i in range(size, 19 * size + 1, size):
-        game.draw.line(screen, 'grey50', (i, size), (i, 19 * size), width = line_width)
+        game.draw.line(screen, board_color, (i, size), (i, 19 * size), width = line_width)            
         
     for i in range(size, 19 * size + 1, size):
-        game.draw.line(screen, 'grey50', (size, i), (19 * size, i), width = line_width)
+        game.draw.line(screen, board_color, (size, i), (19 * size, i), width = line_width)
+        
+    for i in range(size + 3 * size, 3 * 6 * size + 3 * size + 1, 6 * size):
+        for j in range(size + 3 * size, 3 * 6 * size + 3 * size + 1, 6 * size):
+            game.draw.circle(screen, board_color, (i, j), 6)
 
-# def draw_pieces():
+def draw_pieces(size):
     # TODO
+    
+    
 
 # main game loop
-run = True
-while run:
+running = True
+game_over = False
+while running:
     clock.tick(fps)
     screen.fill('darkgoldenrod3') # mano, que desgraça de cor que eu escolhi
     
-    draw_board(50)
+    draw_board(board_size)
     
     #event handling
     for event in game.event.get():
         
         if event.type == game.QUIT:
-            run = False
+            running = False
             
-        if event.type == game.MOUSEBUTTONDOWN and event.button == 1 and not game_over:
-            x_coord = event.pos[0] // 100
-            y_coord = event.pos[1] // 100
-            click_coords = (x_coord, y_coord)
+        #if event.type == game.MOUSEBUTTONDOWN and event.button == 1 and not game_over:
+        #    x_coord = event.pos[0] // 100
+        #    y_coord = event.pos[1] // 100
+        #    click_coords = (x_coord, y_coord)
             # TODO
+            
+        
             
     game.display.flip()
 
