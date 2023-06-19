@@ -3,18 +3,11 @@ import random
 
 # pygame setup
 
-screen_width = 700
-screen_height = 700
-board_size = 35
+screen_width = 1280
+screen_height = 720
+board_size = round(screen_height  / 20)
+print(board_size)
 board_color = 'black'
-board_pieces = [[0 for j in range(21)] for i in range(21)] # -1 = invalid, 0 = empty, 1 = black, 2 = white
-
-for i in range(21): # invalid positions
-    board_pieces[0][i] = -1
-    board_pieces[20][i] = -1
-    board_pieces[i][0] = -1
-    board_pieces[i][20] = -1
-
 
 game.init()
 screen = game.display.set_mode((screen_width, screen_height))
@@ -27,6 +20,22 @@ fps = 60
 
 
 # game setting
+
+invalid = -1
+empty = 0
+black = 1
+white = 2
+removing_black = 3
+removing_white = 4
+removed = 5
+
+board_pieces = [[empty for j in range(21)] for i in range(21)]
+
+for i in range(21): # board borders are invalid, only exist to make searches easier
+    board_pieces[0][i] = -1
+    board_pieces[20][i] = -1
+    board_pieces[i][0] = -1
+    board_pieces[i][20] = -1
 
 black_stock = 181
 white_stock = 180
@@ -52,25 +61,45 @@ def draw_pieces(size):
 
     for i in range(20):
         for j in range(20):
-            if(board_pieces[i][j] == 1):
+            if(board_pieces[i][j] == black):
                 game.draw.circle(screen, 'black', (i * size, j * size), size / 2 - 1)
-            if(board_pieces[i][j] == 2):
+            if(board_pieces[i][j] == white):
                 game.draw.circle(screen, 'white', (i * size, j * size), size / 2 - 1)
     
+def dfs(x, y, color):
+    
+def freedom(x, y): # aplies "freedom" rule
+    
+    #color = board_pieces[x][y]
+    is_free = 0
+    
+    is_free += freedom(x + 1, y)
+    is_free += freedom(x - 1, y)
+    is_free += freedom(x, y + 1)
+    is_free += freedom(x, y - 1)
+    
+    return is_free
+    
+    # TODO
+
 
 def valid_move(x, y):
     
-    # TODO (or not, idk)
-    if board_pieces[x][y] != 0:    
-        return
-    
+    if x < 1 or y < 1 or x > 19 or y > 19:
+        return False
+    if board_pieces[x][y] != 0:
+        return False
+    # TODO
+
     return True
 
 def try_move(x, y):
     
-    if board_pieces[x][y] != 0:    
+    if not valid_move(x, y):    
         return
-        
+    
+    
+    turn += 1
     
     
     
@@ -78,6 +107,8 @@ def try_move(x, y):
 # main game loop
 running = True
 game_over = False
+cursor_x = 0
+cursor_y = 0
 while running:
     clock.tick(fps)
     screen.fill('darkgoldenrod3') # mano, que desgraça de cor que eu escolhi
@@ -91,18 +122,32 @@ while running:
         if event.type == game.QUIT:
             running = False
             
+        if event.type == game.MOUSEMOTION and not game_over:
+            x_coord = round(event.pos[0] / board_size)
+            y_coord = round(event.pos[1] / board_size)
+            click_coords = (x_coord, y_coord)
+            print((x_coord, y_coord))
+            
+            cursor_x = x_coord
+            cursor_y = y_coord
+                
+            
         if event.type == game.MOUSEBUTTONDOWN and event.button == 1 and not game_over:
             x_coord = round(event.pos[0] / board_size)
             y_coord = round(event.pos[1] / board_size)
             click_coords = (x_coord, y_coord)
+            print((x_coord, y_coord))
             
             if valid_move(x_coord, y_coord):
                 board_pieces[x_coord][y_coord] = 1 if turn % 2 == 0 else 2
                 turn += 1
             
             # TODO
-
-        
+    if valid_move(cursor_x, cursor_y):
+        if turn % 2 == 0:
+            game.draw.circle(screen, 'black', (cursor_x * board_size, cursor_y * board_size), board_size / 2 - 1, 5)
+        else:
+            game.draw.circle(screen, 'white', (cursor_x * board_size, cursor_y * board_size), board_size / 2 - 1, 5)
             
     game.display.flip()
 
