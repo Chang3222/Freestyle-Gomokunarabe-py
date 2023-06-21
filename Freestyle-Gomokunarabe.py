@@ -66,38 +66,87 @@ def draw_pieces(size):
             if(board_pieces[i][j] == white):
                 game.draw.circle(screen, 'white', (i * size, j * size), size / 2 - 1)
     
-def dfs(x, y, color):
     
-def freedom(x, y): # aplies "freedom" rule
+def freedom(x, y, piece_color): # checks for "freedom" rule by using dfs (for a given group of connected pieces of the same color to be in the board, at least 1 of them must have a free space adjacent to it)
     
-    #color = board_pieces[x][y]
-    is_free = 0
+    if board_pieces[x][y] == empty:
+        return 1
+        
+    if board_pieces[x][y] != piece_color:
+        return 0
     
-    is_free += freedom(x + 1, y)
-    is_free += freedom(x - 1, y)
-    is_free += freedom(x, y + 1)
-    is_free += freedom(x, y - 1)
     
-    return is_free
+    free = 0
     
-    # TODO
+    board_pieces[x][y] = removing_black if piece_color == black else removing_white
+    
+    if board_pieces[x + 1][y] != board_pieces[x][y]: free += freedom(x + 1, y, piece_color)
+    if board_pieces[x - 1][y] != board_pieces[x][y]: free += freedom(x - 1, y, piece_color)
+    if board_pieces[x][y + 1] != board_pieces[x][y]: free += freedom(x, y + 1, piece_color)
+    if board_pieces[x][y - 1] != board_pieces[x][y]: free += freedom(x, y - 1, piece_color)
+    
+    board_pieces[x][y] = piece_color
+    
+    return free
+    
+    # DONE???
 
 
 def valid_move(x, y):
     
     if x < 1 or y < 1 or x > 19 or y > 19:
         return False
-    if board_pieces[x][y] != 0:
+    if board_pieces[x][y] != empty:
         return False
-    # TODO
+    
+    board_pieces[x][y] = black if turn % 2 == 0 else white
+    if freedom(x, y, board_pieces[x][y]) == 0:
+        if board_pieces[x + 1][y] != board_pieces[x][y] and board_pieces[x + 1][y] != invalid and freedom(x + 1, y, black if turn % 2 == 1 else white) == 0:
+            board_pieces[x][y] = 0
+            return True
+        if board_pieces[x - 1][y] != board_pieces[x][y] and board_pieces[x - 1][y] != invalid and freedom(x - 1, y, black if turn % 2 == 1 else white) == 0:
+            board_pieces[x][y] = 0
+            return True
+        if board_pieces[x][y + 1] != board_pieces[x][y] and board_pieces[x][y + 1] != invalid and freedom(x, y + 1, black if turn % 2 == 1 else white) == 0:
+            board_pieces[x][y] = 0
+            return True
+        if board_pieces[x][y - 1] != board_pieces[x][y] and board_pieces[x][y - 1] != invalid and freedom(x, y - 1, black if turn % 2 == 1 else white) == 0:
+            board_pieces[x][y] = 0
+            return True
+        
+        board_pieces[x][y] = 0
+        return False
+        
+    else:
+        board_pieces[x][y] = 0
+        return True
+    # DONE???
 
     return True
+
+def remove_pieces(x, y, piece_color):
+    
+    if board_pieces[x][y] != piece_color: return
+    
+    board_pieces[x][y] = empty
+    
+    remove_pieces(x + 1, y, piece_color)
+    remove_pieces(x - 1, y, piece_color)
+    remove_pieces(x, y + 1, piece_color)
+    remove_pieces(x, y - 1, piece_color)
+    
+    board_pieces[x][y] = empty if freedom(x, y, black if turn % 2 == 0 else white) > 0 else removed
+    
+    #TODO
 
 def try_move(x, y):
     
     if not valid_move(x, y):    
         return
     
+    board_pieces[x][y] = black if turn % 2 == 0 else white
+    
+    # TODO
     
     turn += 1
     
