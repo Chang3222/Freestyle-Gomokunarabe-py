@@ -36,6 +36,8 @@ remove_list = []
 
 board_pieces = [[empty for j in range(21)] for i in range(21)]
 
+previous_boards = []
+
 for i in range(21): # board borders are invalid, only exist to make searches easier
     board_pieces[0][i] = invalid
     board_pieces[20][i] = invalid
@@ -65,7 +67,10 @@ def draw_pieces(size):
                 game.draw.circle(screen, 'black', (i * size, j * size), size / 2 - 1)
             if(board_pieces[i][j] == white):
                 game.draw.circle(screen, 'white', (i * size, j * size), size / 2 - 1)
+
+def draw_info(size):
     
+    # TODO
     
 def freedom(x, y, piece_color): # checks for "freedom" rule by using dfs (for a given group of connected pieces of the same color to be in the board, at least 1 of them must have a free space adjacent to it)
     
@@ -186,7 +191,11 @@ def is_winning_move(x, y, piece_color):
         
     return x_win >= 5 or y_win >= 5 or xy_win >= 5 or yx_win >= 5
     
-    
+def undo():
+    if len(previous_boards) == 0:
+        return
+    board_pieces = previous_boards[len(previous_boards) - 1].copy()
+    previous_boards.pop(len(previous_boards) - 1)
 
 def try_move(x, y):
     
@@ -194,6 +203,8 @@ def try_move(x, y):
         
     if not valid_move(x, y):    
         return
+    
+    previous_boards.append(board_pieces.copy())
     
     board_pieces[x][y] = black if turn % 2 == 0 else white
     opposite = black if turn % 2 == 1 else white
