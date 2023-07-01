@@ -17,8 +17,13 @@ big_font = game.font.Font('freesansbold.ttf', 50)
 clock = game.time.Clock()
 fps = 60
 
+running = True
 
 # game setting
+
+game_over = False
+cursor_x = 0
+cursor_y = 0
 
 invalid = -1
 empty = 0
@@ -32,6 +37,7 @@ black_stock = 181
 white_stock = 180
 
 turn = 0
+winner = 0
 remove_list = []
 
 board_pieces = [[empty for j in range(21)] for i in range(21)]
@@ -70,6 +76,19 @@ def draw_pieces(size):
 
 def draw_info(size):
     
+    global game_over
+    
+    screen.blit(font.render('Undo', True, 'black'), (20 * size, size))
+    
+    if winner == black:
+        game_over = True
+        screen.blit(big_font.render('Black Wins', True, 'black'), (20 * size, 18 * size))
+        
+    if winner == white:
+        game_over = True
+        screen.blit(big_font.render('White Wins', True, 'white'), (20 * size, 18 * size))
+    
+    #pass
     # TODO
     
 def freedom(x, y, piece_color): # checks for "freedom" rule by using dfs (for a given group of connected pieces of the same color to be in the board, at least 1 of them must have a free space adjacent to it)
@@ -200,6 +219,7 @@ def undo():
 def try_move(x, y):
     
     global turn
+    global winner
         
     if not valid_move(x, y):    
         return
@@ -221,10 +241,9 @@ def try_move(x, y):
     if board_pieces[x][y - 1] == opposite and freedom(x, y - 1, opposite) == 0:
         remove_pieces(x, y - 1, opposite)
         
-    # TODO
     
     if is_winning_move(x, y, black if turn % 2 == 0 else white):
-        print(f'{black if turn % 2 == 0 else white} wins')
+        winner = black if turn % 2 == 0 else white
         
     turn += 1
     
@@ -238,16 +257,14 @@ def try_move(x, y):
     
 
 # main game loop
-running = True
-game_over = False
-cursor_x = 0
-cursor_y = 0
+
 while running:
     clock.tick(fps)
     screen.fill('darkgoldenrod3') # mano, que desgraça de cor que eu escolhi
     
     draw_board(board_size)
     draw_pieces(board_size)
+    draw_info(board_size)
     
     #event handling
     for event in game.event.get():
@@ -270,7 +287,7 @@ while running:
             try_move(x_coord, y_coord)
             
             # TODO
-    if valid_move(cursor_x, cursor_y):
+    if valid_move(cursor_x, cursor_y) and not game_over:
         if turn % 2 == 0:
             game.draw.circle(screen, 'black', (cursor_x * board_size, cursor_y * board_size), board_size / 2 - 1, 5)
         else:
