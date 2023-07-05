@@ -211,10 +211,18 @@ def is_winning_move(x, y, piece_color):
     return x_win >= 5 or y_win >= 5 or xy_win >= 5 or yx_win >= 5
     
 def undo():
+    global board_pieces
     if len(previous_boards) == 0:
         return
+    print(len(previous_boards))
     board_pieces = previous_boards[len(previous_boards) - 1].copy()
     previous_boards.pop(len(previous_boards) - 1)
+
+def undo_box(x, y):
+    x *= board_size
+    y *= board_size
+    
+    return x >= 20 * board_size and x <= 21.5 * board_size and y >= board_size and y <= 35 + board_size
 
 def try_move(x, y):
     
@@ -251,10 +259,8 @@ def try_move(x, y):
             
         board_pieces[remove_list[0][1]][remove_list[0][2]] = empty
         remove_list.pop(0)
-    
-    
-    
-    
+
+
 
 # main game loop
 
@@ -272,26 +278,29 @@ while running:
         if event.type == game.QUIT:
             running = False
             
-        if event.type == game.MOUSEMOTION and not game_over:
+        if event.type == game.MOUSEMOTION:
+            cursor_x = round(event.pos[0] / board_size)
+            cursor_y = round(event.pos[1] / board_size)
+                            
+            
+        if event.type == game.MOUSEBUTTONDOWN and event.button == 1:
             x_coord = round(event.pos[0] / board_size)
             y_coord = round(event.pos[1] / board_size)
             
-            cursor_x = x_coord
-            cursor_y = y_coord
-                
+            if not game_over:
+                try_move(x_coord, y_coord)
             
-        if event.type == game.MOUSEBUTTONDOWN and event.button == 1 and not game_over:
-            x_coord = round(event.pos[0] / board_size)
-            y_coord = round(event.pos[1] / board_size)
-            
-            try_move(x_coord, y_coord)
-            
+            if undo_box(x_coord, y_coord):
+                undo()
             # TODO
     if valid_move(cursor_x, cursor_y) and not game_over:
         if turn % 2 == 0:
             game.draw.circle(screen, 'black', (cursor_x * board_size, cursor_y * board_size), board_size / 2 - 1, 5)
         else:
             game.draw.circle(screen, 'white', (cursor_x * board_size, cursor_y * board_size), board_size / 2 - 1, 5)
+    
+    if undo_box(cursor_x, cursor_y):
+        game.draw.line(screen, board_color, (20 * board_size, board_size + 25), (21.5 * board_size, board_size + 25), width = 3)
             
     game.display.flip()
 
