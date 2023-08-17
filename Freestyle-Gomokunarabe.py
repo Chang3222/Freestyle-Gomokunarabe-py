@@ -40,7 +40,7 @@ turn = 0
 winner = 0
 remove_list = []
 
-board_pieces = [[empty for j in range(21)] for i in range(21)]
+board_pieces = [[[empty for j in range(21)] for i in range(21)]]
 
 previous_boards = []
 
